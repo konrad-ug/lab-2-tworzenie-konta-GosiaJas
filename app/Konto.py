@@ -1,5 +1,5 @@
 class Konto:
-    def __init__(self, imie, nazwisko, pesel, kod):
+    def __init__(self, imie, nazwisko, pesel, kod = None):
         self.imie = imie
         self.nazwisko = nazwisko
         self.saldo = 0
@@ -7,5 +7,8 @@ class Konto:
         if(kod == None):
             self.kod = None
         else:
-            if(kod[0] == "P" and kod[1] == "R" and kod[2] == "O" and kod[3] == "M" and kod[4] == "_" and len(kod) == 8):
-                self.saldo = 50
+            if(kod[0:5] == "PROM_" and len(kod) == 8):
+                # self.saldo = 50
+                # f5
+                if(int(pesel[0:2]) > 60 or int(pesel[2]) == 2 or int(pesel[2]) == 3):
+                    self.saldo = 50
