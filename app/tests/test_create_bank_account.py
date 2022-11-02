@@ -1,6 +1,7 @@
 import unittest
 
 from ..Konto import Konto
+from ..Konto import KontoFirmowe
 
 class TestCreateBankAccount(unittest.TestCase):
 
@@ -83,3 +84,85 @@ class TestCreateBankAccount(unittest.TestCase):
         self.assertEqual(dziewiate_konto.saldo, 50, "Saldo nie jest rowne 50!")
         self.assertEqual(dziewiate_konto.pesel, "77120356421", "Pesel nie został zapisany!")  # f2
         self.assertEqual(len(dziewiate_konto.pesel), 11, "Niepoprawny pesel")  # f3
+
+class TestsPrzelewy(unittest.TestCase):
+
+    def testPrzelewWychodzacy_wystarczajaceSrodki(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        przelew = 100
+        konto.saldo = 500
+        konto.przelewWychodzacy(przelew)
+        self.assertEqual(konto.saldo, 500 - przelew, "Nie udalo sie wykonac przelewu")
+
+    def testPrzelewWychodzacy_niewystarczajaceSrodki(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        przelew = 400
+        konto.saldo = 200
+        konto.przelewWychodzacy(przelew)
+        self.assertEqual(konto.saldo, 200, "Udalo sie wykonac przelew")
+
+    def testPrzelewWchodzacy(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        przelew = 100
+        konto.saldo = 200
+        konto.przelewWchodzacy(przelew)
+        self.assertEqual(konto.saldo, 200 + przelew, "Nie udalo sie odebrac przelewu")
+
+    def testKilkaPrzelewów(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.saldo = 400
+        konto.przelewWchodzacy(300)
+        konto.przelewWychodzacy(200)
+        konto.przelewWychodzacy(200)
+        konto.przelewWchodzacy(100)
+        self.assertEqual(konto.saldo,400 + 300 - 200 - 200 + 100, "Nie udalo sie wykonac serii przelewów")
+
+class TestsKontoFirmowe(unittest.TestCase):
+    def testPoprawnyNIP(self):
+        konto = KontoFirmowe("firma", "1234567890")
+        self.assertEqual(len(konto.NIP), 10, "Niepoprawna długość NIP")
+
+    def testZaDlugiNIP(self):
+        konto = KontoFirmowe("firma", "123456789101112")
+        self.assertEqual(konto.NIP, "Niepoprawny NIP", "Bład!")
+
+    def testZaKrotkiNIP(self):
+        konto = KontoFirmowe("firma", "12345")
+        self.assertEqual(konto.NIP, "Niepoprawny NIP", "Błąd!")
+
+class TestsPrzelewyEkspresowe(unittest.TestCase):
+    def testEkspresowyWychodzacy_kontoZwykle_wystarczajaceSrodki(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(300)
+        self.assertEqual(konto.saldo, 500 - 300 - 1, "Nie udało się wykonać przelewu ekspresowego")
+
+    def testEkspresowyWychodzacy_kontoZwykle_niewystarczajaceSrodki(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(800)
+        self.assertEqual(konto.saldo, 500, "Blad!")
+
+    def tesEkspresowyWychodzacy_kontoZwykle_przelewWszystkichSrodkow(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(500)
+        self.assertEqual(konto.saldo, 500 - 500 - 1, "Nieudało się wykonać przelewu ekspresowego")
+
+    def testEkspresowyWychodzacy_kontoFirmowe_wystarczajaceSrodki(self):
+        konto = KontoFirmowe("firma", "1234567890")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(300)
+        self.assertEqual(konto.saldo, 500 - 300 - 5, "Nie udało się wykonać przelewu ekspresowego")
+
+    def testEkspresowyWychodzacy_kontoFirmowe_niewystarczajaceSrodki(self):
+        konto = KontoFirmowe("firma", "1234567890")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(800)
+        self.assertEqual(konto.saldo, 500, "Blad!")
+
+    def testEkspresowyWychodzacy_kontoFirmowe_przelewWszystkichSrodkow(self):
+        konto = KontoFirmowe("firma", "1234567890")
+        konto.saldo = 500
+        konto.ekspresowyWychodzacy(500)
+        self.assertEqual(konto.saldo, 500 - 500 - 5, "Nieudało się wykonać przelewu ekspresowego")
