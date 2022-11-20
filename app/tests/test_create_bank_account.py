@@ -166,3 +166,51 @@ class TestsPrzelewyEkspresowe(unittest.TestCase):
         konto.saldo = 500
         konto.ekspresowyWychodzacy(500)
         self.assertEqual(konto.saldo, 500 - 500 - 5, "Nieudało się wykonać przelewu ekspresowego")
+
+class TestHistoria(unittest.TestCase):
+    def testHistoria_KontoZwykle(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.przelewWchodzacy(300)
+        konto.przelewWchodzacy(500)
+        konto.przelewWychodzacy(200)
+        konto.przelewWchodzacy(50)
+        konto.przelewWychodzacy(120)
+        konto.ekspresowyWychodzacy(320)
+        konto.przelewWchodzacy(80)
+        self.assertEqual(konto.historia, [300,500,-200,50,-120, -320, -1, 80], "Błąd w historii")
+
+    def testHistoria_KontoFirmowe(self):
+        konto = KontoFirmowe("firma", "1234567890")
+        konto.przelewWchodzacy(300)
+        konto.przelewWchodzacy(500)
+        konto.przelewWychodzacy(200)
+        konto.przelewWchodzacy(50)
+        konto.przelewWychodzacy(120)
+        konto.ekspresowyWychodzacy(320)
+        konto.przelewWchodzacy(80)
+        self.assertEqual(konto.historia, [300,500,-200,50,-120,-320, -5,80], " Błąd w historii")
+
+class TestZaciaganieKredytu(unittest.TestCase):
+    def testKredytUdzielony(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.historia = [400, -300, 400, -50, 120, 300, 20]
+        konto.zaciagnijKredyt(400)
+        self.assertEqual(konto.zaciagnijKredyt(400), True, "Nie przyznano kredytu")
+
+    def testKredytNieudzielony_ZaKrotkaHistoria(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.historia = [300, 400, 20]
+        konto.zaciagnijKredyt(400)
+        self.assertEqual(konto.zaciagnijKredyt(400), False, "Błąd")
+    
+    def testKredytNieudzielony_OstatnieZaksiegowanieWyplata(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.historia = [300, 400, -20, 100, -60, 200, -55]
+        konto.zaciagnijKredyt(400)
+        self.assertEqual(konto.zaciagnijKredyt(400), False, "Błąd")
+
+    def testKredytNieudzielony_KredytWiekszyNizSumaOstatnichTransakci(self):
+        konto = Konto("Dariusz", "Januszewski", "94110912342")
+        konto.historia = [300, 400, 20, -300, -50, 100, 55, 400]
+        konto.zaciagnijKredyt(400)
+        self.assertEqual(konto.zaciagnijKredyt(400), False, "Błąd")
