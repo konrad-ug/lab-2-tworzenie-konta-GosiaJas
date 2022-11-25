@@ -62,6 +62,18 @@ class KontoFirmowe(Konto):
             self.historia.append(-kwotaEkspresowego)
             self.historia.append(-5)
 
+    def zaciagnijKredyt(self, kwotaKredytu):
+        if(sum(self.historia) >= 2 * kwotaKredytu):
+            for i in range(len(self.historia)):
+                if(self.historia[i] == -1775):
+                    return True
+            return False
+        else:
+            return False        
+            
+            
+        
+
 
 
 
