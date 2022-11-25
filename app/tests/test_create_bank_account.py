@@ -143,7 +143,7 @@ class TestsPrzelewyEkspresowe(unittest.TestCase):
         konto.ekspresowyWychodzacy(800)
         self.assertEqual(konto.saldo, 500, "Blad!")
 
-    def tesEkspresowyWychodzacy_kontoZwykle_przelewWszystkichSrodkow(self):
+    def testEkspresowyWychodzacy_kontoZwykle_przelewWszystkichSrodkow(self):
         konto = Konto("Dariusz", "Januszewski", "94110912342")
         konto.saldo = 500
         konto.ekspresowyWychodzacy(500)
@@ -214,3 +214,6 @@ class TestZaciaganieKredytu(unittest.TestCase):
         konto.historia = [300, 400, 20, -300, -50, 100, 55, 400]
         konto.zaciagnijKredyt(400)
         self.assertEqual(konto.zaciagnijKredyt(400), False, "Błąd")
+
+
+        # refractor i zadanie 13 
